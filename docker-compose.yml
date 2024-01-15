@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    command: [ "run", "--host", "0.0.0.0" ]
+    ports:
+      - 5000:5000
+      - 5678:5678
+    secrets:
+      - dotenv
+    environment:
+      - FLASK_APP=manage.py
+      - "OPENAI_API_KEY=${OPENAI_API_KEY}"
+      - "OPENAI_GPT_VERSION=${OPENAI_GPT_VERSION}"
+    volumes:
+      - ./app:/usr/src/app
+
+secrets:
+  dotenv:
+    file: .env
