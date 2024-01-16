@@ -17,3 +17,6 @@ restart:
 
 run:
 	@${docker-compose} exec app pipenv run python manage.py run
+
+estimate_total_cost:
+	@${docker-compose} exec app pipenv run python manage.py estimate_total_cost
