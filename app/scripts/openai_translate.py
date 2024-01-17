@@ -86,6 +86,7 @@ def run_batch_translation():
         save_output(i)
         translated_conversations.clear()
         conv_to_translate.clear()
+    iterator.close()
 
 def translate_openai(conv_to_translate: list[str]) -> list[str]:
     """

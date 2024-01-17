@@ -77,6 +77,7 @@ def run_inference():
         inferenced_conversations.append(translated_entry)
         save_output()
         inferenced_conversations.clear()
+    iterator.close()
 
 def save_output():
     '''
