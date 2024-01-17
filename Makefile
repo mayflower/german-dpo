@@ -15,8 +15,8 @@ stop:
 restart:
 	@${docker-compose} restart
 
-run:
-	@${docker-compose} exec app pipenv run python manage.py run
+run_translations:
+	@${docker-compose} exec app pipenv run python manage.py run_translations
 
-estimate_total_cost:
-	@${docker-compose} exec app pipenv run python manage.py estimate_total_cost
+estimate_metrics:
+	@${docker-compose} exec app pipenv run python manage.py estimate_metrics

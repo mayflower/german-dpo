@@ -7,6 +7,7 @@ import math
 import numpy as np
 import os
 import pandas as pd
+import time
 from tqdm import tqdm
 
 llm = OpenAI(
@@ -34,8 +35,7 @@ dataset = load_dataset("Open-Orca/SlimOrca-Dedup",
 total_dataset_size = len(dataset['train']["conversations"])
 
 # Batch size configurations
-batch_size = 2
-total_batches = 2
+batch_size = 5
 
 # Covers translations
 translated_conversations = []
@@ -43,7 +43,7 @@ translated_conversations = []
 # Define the total costs
 total_costs = []
 
-def run_translation():
+def run_batch_translations(total_batches: int = None):
     '''
     Run the translation script
     '''
@@ -53,9 +53,11 @@ def run_translation():
     if batch_size <= 0:
         raise ValueError("Batch size must be greater than 0")
     # Prepare the translation
-    for i in tqdm(range(0, total_dataset_size, batch_size), total=math.ceil(total_dataset_size/batch_size), desc="Start translating"):
+    iterator = tqdm(range(0, total_dataset_size, batch_size), total=math.ceil(total_dataset_size/batch_size), desc="Start translating")
+    for i in iterator:
         # Stop if we have reached the total batch itterations
-        if i == (batch_size * total_batches):
+        if (total_batches is not None) and (i == (batch_size * total_batches)):
+            iterator.close()
             break
         conv_entries = dataset['train']["conversations"][i:i+batch_size]
         # Prepare the batch
@@ -109,11 +111,35 @@ def save_output():
     pd.DataFrame(translated_conversations).to_json(json_filename, index=False, encoding='utf-8', ensure_ascii=False)
     print(f"Done translation. Stored results into file: {json_filename}")
 
-def estimate_total_cost():
+def estimate_metrics():
     '''
-    Estimate the total cost of the translation
+    Run the translation and save the output
     '''
+    # Get the start time
+    st = time.time()
     # Run the translation with total batch size of 5, e.g., batch size of 2 times 5 = 10 conversation entries
-    run_translation()
+    run_batch_translations(total_batches = 2)
+    total_batch_iterations = np.round(math.ceil(total_dataset_size / batch_size))
+    mean_batch_cost = np.mean(total_costs)
     # Estimate total cost
-    print(f"Estimated Total Cost (USD): ${total_dataset_size * (np.sum(total_costs) / total_batches)}")
+    print(f"Estimated Total Cost (USD): ${np.round(total_batch_iterations * mean_batch_cost, 2)}")
+    # Get the end time
+    et = time.time()
+    # Get the execution time
+    elapsed_time = et - st
+    print(f"Estimated Total Runtime: {np.round(elapsed_time * total_batch_iterations, 2)} seconds)")
+
+def run_translations():
+    '''
+    Run the translation and save the output
+    '''
+    # Get the start time
+    st = time.time()
+    # Run the translation and save the output
+    run_batch_translations(total_batches=2)
+    save_output()
+    # Get the end time
+    et = time.time()
+    # Get the execution time
+    elapsed_time = et - st
+    print(f"Total Runtime: {np.round(elapsed_time, 2)} seconds)")

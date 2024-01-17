@@ -1,0 +1,6 @@
+batch_size,est_total_costs_$,est_total_runtime_sec
+2,272.80,3588626.23
+4,369.67,3624802.87
+5,340.32,3299721.84
+6,NA,NA
+8,NA,NA
