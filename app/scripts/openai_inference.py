@@ -59,7 +59,6 @@ def run_inference():
     for i in iterator:
         # Stop if we have reached the total batch itterations
         if (max_iterations is not None) and (i == max_iterations):
-            iterator.close()
             break
         translated_entry = pdo_translations.iloc[i]
         with get_openai_callback() as cb:

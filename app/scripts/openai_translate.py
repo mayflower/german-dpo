@@ -67,7 +67,6 @@ def run_batch_translation():
     for i in iterator:
         # Stop if we have reached the total batch itterations
         if (max_batches is not None) and (i == (batch_size * max_batches)):
-            iterator.close()
             break
         conv_entries = dataset['train']["conversations"][i:i+batch_size]
         # Prepare the batch
