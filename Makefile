@@ -24,4 +24,7 @@ estimate_inference:
 run_translations:
 	@${docker-compose} exec app pipenv run python manage.py run_translations
 
+run_inference:
+	@${docker-compose} exec app pipenv run python manage.py run_inference
+
 
