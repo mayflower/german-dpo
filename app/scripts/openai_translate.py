@@ -32,18 +32,28 @@ chain = prompt | llm
 # 364k dataset length
 dataset = load_dataset("Open-Orca/SlimOrca-Dedup",
                         cache_dir="./cache")
-total_dataset_size = len(dataset['train']["conversations"])
+
+json_filename = './output/dpo_translation.json'
+cache_index_filename = './cache/dpo_translation_index.csv'
 
 # Batch size configurations
-batch_size = 5
+# Run the translation with max batch size of 2,
+# e.g., batch size of 2 times 2 = 4 conversation entries in total
+# Set max_batches to None to run the full dataset
+batch_size = 2
+max_batches = None
+
+# Get the total dataset size and calculate the total batch iterations
+total_dataset_size = len(dataset['train']["conversations"])
+total_batch_iterations = math.ceil(total_dataset_size/batch_size)
 
 # Covers translations
 translated_conversations = []
 
-# Define the total costs
+# Saves the total costs
 total_costs = []
 
-def run_batch_translations(total_batches: int = None):
+def run_batch_translations():
     '''
     Run the translation script
     '''
@@ -53,10 +63,10 @@ def run_batch_translations(total_batches: int = None):
     if batch_size <= 0:
         raise ValueError("Batch size must be greater than 0")
     # Prepare the translation
-    iterator = tqdm(range(0, total_dataset_size, batch_size), total=math.ceil(total_dataset_size/batch_size), desc="Start translating")
+    iterator = tqdm(range(0, total_dataset_size, batch_size), total=total_batch_iterations, desc="Start translating")
     for i in iterator:
         # Stop if we have reached the total batch itterations
-        if (total_batches is not None) and (i == (batch_size * total_batches)):
+        if (max_batches is not None) and (i == (batch_size * max_batches)):
             iterator.close()
             break
         conv_entries = dataset['train']["conversations"][i:i+batch_size]
@@ -72,7 +82,10 @@ def run_batch_translations(total_batches: int = None):
         # Translate the batch
         translated_conversations.append(
             translate_openai(conv_to_translate))
-        conv_to_translate = []
+        # Save the batch output
+        save_output(i)
+        translated_conversations.clear()
+        conv_to_translate.clear()
 
 def translate_openai(conv_to_translate: list[str]) -> list[str]:
     """
@@ -99,17 +112,33 @@ def translate_openai(conv_to_translate: list[str]) -> list[str]:
 
     return result
 
-def save_output():
+def save_output(index: int = None):
     '''
     Save the output json file
     '''
     # 4 columns, system prompt e.g., “You are a system that can math”, user prompt “What is 5 x 5?”, 
     # Reject result (Mistral), accept result (GPT4).
     # Save JSON-file
-    print("Writing to translation file...")
-    json_filename = './output/dpo_translation.json'
-    pd.DataFrame(translated_conversations).to_json(json_filename, index=False, encoding='utf-8', ensure_ascii=False)
-    print(f"Done translation. Stored results into file: {json_filename}")
+    print("Writing to translation file ...")
+    def reduce_translated_conversations():
+        merged_list = []
+        for conv in translated_conversations:
+            merged_list.extend(conv)
+        return merged_list
+    
+    pd.DataFrame(reduce_translated_conversations()).to_json(
+        json_filename, force_ascii=False, mode='a', orient='records', lines=True)
+    print("Done writing to translation file")
+    
+    # Writing index to file to keep track of progress and resume if necessary
+    print("Writing index to file ...")
+    if index is not None:
+        pd.DataFrame([{
+            'current_index':index,
+            'max_batches':max_batches,
+            'total_batch_iterations':total_batch_iterations}]).to_csv(
+            cache_index_filename, encoding='utf-8', mode='w', index=False)
+    print("Done writing index to file")
 
 def estimate_metrics():
     '''
@@ -117,17 +146,16 @@ def estimate_metrics():
     '''
     # Get the start time
     st = time.time()
-    # Run the translation with total batch size of 5, e.g., batch size of 2 times 5 = 10 conversation entries
-    run_batch_translations(total_batches = 2)
-    total_batch_iterations = np.round(math.ceil(total_dataset_size / batch_size))
+    # Run the translation and save the output
+    run_batch_translations()
     mean_batch_cost = np.mean(total_costs)
     # Estimate total cost
-    print(f"Estimated Total Cost (USD): ${np.round(total_batch_iterations * mean_batch_cost, 2)}")
+    print(f"Estimated total cost (USD): ${np.round(total_batch_iterations * mean_batch_cost, 2)}")
     # Get the end time
     et = time.time()
     # Get the execution time
     elapsed_time = et - st
-    print(f"Estimated Total Runtime: {np.round(elapsed_time * total_batch_iterations, 2)} seconds)")
+    print(f"Estimated total runtime: {np.round(elapsed_time * total_batch_iterations, 2)} seconds)")
 
 def run_translations():
     '''
@@ -136,10 +164,10 @@ def run_translations():
     # Get the start time
     st = time.time()
     # Run the translation and save the output
-    run_batch_translations(total_batches=2)
-    save_output()
+    run_batch_translations()
     # Get the end time
     et = time.time()
     # Get the execution time
     elapsed_time = et - st
-    print(f"Total Runtime: {np.round(elapsed_time, 2)} seconds)")
+    print(f"Done translation in: {np.round(elapsed_time, 2)} seconds)")
+    
