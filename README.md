@@ -17,7 +17,22 @@ make build
 make up
 ```
 
-# Generate product descriptions based on product images
+# Estimates the costs/runtime of the system & user prompt translation
 ```
-make generate_on_image
+make estimate_translation
+```
+
+# Estimates the costs/runtime of the inference task for the 'chosen' (will be later extended with the 'rejected') field
+```
+make estimate_inference
+```
+
+# Starts the system & user prompt translation 
+```
+make run_translations
+```
+
+# Starts the inference for the 'chosen' (will be later extended with the 'rejected') field 
+```
+make run_inference
 ```

@@ -24,11 +24,11 @@ def run_translation():
 
 @cli.command('run_inference')
 def run_inference():
-  #"""
+  """
   debugpy.listen(("0.0.0.0", 5678))
   print("Waiting for client to attach...")
   debugpy.wait_for_client()
-  #"""
+  """
   inf.run_inference()
 
 if __name__ == "__main__":
