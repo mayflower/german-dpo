@@ -11,7 +11,7 @@ import time
 from tqdm import tqdm
 
 llm = OpenAI(
-    model_name=os.environ.get("OPENAI_GPT_VERSION"),
+    model_name=os.environ.get("OPENAI_GPT_TRANSLATION_VERSION"),
     max_tokens=2500,
     temperature=0.0,
 )
@@ -33,7 +33,7 @@ chain = prompt | llm
 dataset = load_dataset("Open-Orca/SlimOrca-Dedup",
                         cache_dir="./cache")
 
-json_filename = './output/dpo_translation.json'
+json_filename = os.environ.get("DPO_TRANSLATION_FILENAME")
 cache_index_filename = './cache/dpo_translation_index.csv'
 
 # Batch size configurations
@@ -53,7 +53,7 @@ translated_conversations = []
 # Saves the total costs
 total_costs = []
 
-def run_batch_translations():
+def run_batch_translation():
     '''
     Run the translation script
     '''
@@ -140,14 +140,14 @@ def save_output(index: int = None):
             cache_index_filename, encoding='utf-8', mode='w', index=False)
     print("Done writing index to file")
 
-def estimate_metrics():
+def estimate_translation():
     '''
-    Run the translation and save the output
+    Check the cost and runtime of the translation
     '''
     # Get the start time
     st = time.time()
     # Run the translation and save the output
-    run_batch_translations()
+    run_batch_translation()
     mean_batch_cost = np.mean(total_costs)
     # Estimate total cost
     print(f"Estimated total cost (USD): ${np.round(total_batch_iterations * mean_batch_cost, 2)}")
@@ -157,14 +157,14 @@ def estimate_metrics():
     elapsed_time = et - st
     print(f"Estimated total runtime: {np.round(elapsed_time * total_batch_iterations, 2)} seconds)")
 
-def run_translations():
+def run_translation():
     '''
     Run the translation and save the output
     '''
     # Get the start time
     st = time.time()
     # Run the translation and save the output
-    run_batch_translations()
+    run_batch_translation()
     # Get the end time
     et = time.time()
     # Get the execution time
