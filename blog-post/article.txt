@@ -45,17 +45,32 @@ Base model
 
 We started with the Mistral-7B-v0.1 model (link: https://huggingface.co/mistralai/Mistral-7B-v0.1), which is a large language model trained on a diverse range of internet text. It is a powerful base model that we used to optimize with DPO.
 
-DPO training dataset preparation
-https://huggingface.co/datasets/mayflowergmbh/intel_orca_dpo_pairs_de
+The model is a pre-trained generative text model with 7 billion parameters. It's a transformer model, with the following architecture choices, grouped-query attention, sliding-window attention, and byte-fallback BPE tokenizer.
 
-system	question	chosen	rejected
-Sie sind ein KI-Assistent. Sie erhalten eine Aufgabe. Sie müssen eine detaillierte und lange Antwort generieren.	
+DPO training dataset preparation
+
+The second step addresses the data preparation, which is used to directly optimize our base model. It generates the sample completions to contrast between the rejected/lower ranked and chosen/preferred ranked answers to a certain user prompt/question. The semantical differences between the texts create the reward function which is used to optimize the base model. Our DPO training data set is available here: https://huggingface.co/datasets/mayflowergmbh/intel_orca_dpo_pairs_de. It is a German dataset, as we focus on optimizing the base LLM to handle German prompts and responses, but you can also use the original DPO dataset for English texts as well, which you find here: https://huggingface.co/datasets/Intel/orca_dpo_pairs.
+
+Our dataset contains the following columns:
+
+text instruction input output
+
+Sie sind ein KI-Assistent. Sie erhalten eine Aufgabe. Sie müssen eine detaillierte und lange Antwort generieren. Bitte beantworten Sie folgende Frage: Ich möchte die Fähigkeit der Schülerinnen und Schüler testen, eine Passage zu lesen und Fragen dazu zu beantworten. Könnten Sie sich bitte eine gute Frage für die Passage ausdenken: "Im Jahr 1901 war die Föderation von Australien der Prozess, durch den die sechs separaten britischen selbstverwalteten Kolonien New South Wales, Queensland, South Australia, Tasmanien, Victoria und Western Australia eine Nation bildeten. Sie behielten die Regierungssysteme bei, die sie als separate Kolonien entwickelt hatten, hatten aber auch eine föderale Regierung, die für Angelegenheiten verantwortlich war, die die ganze Nation betrafen. Als die Verfassung Australiens in Kraft trat, wurden die Kolonien kollektiv zu Staaten des Commonwealth of Australia. ... [Anm. Author: Text gekürzt]
+
+Sie sind ein KI-Assistent. Sie erhalten eine Aufgabe. Sie müssen eine detaillierte und lange Antwort generieren.
+
 Bitte beantworten Sie folgende Frage: Ich möchte die Fähigkeit der Schülerinnen und Schüler testen, eine Passage zu lesen und Fragen dazu zu beantworten. Könnten Sie sich bitte eine gute Frage für die Passage ausdenken: "Im Jahr 1901 war die Föderation von Australien der Prozess, durch den die sechs separaten britischen selbstverwalteten Kolonien New South Wales, Queensland, South Australia, Tasmanien, Victoria und Western Australia eine Nation bildeten. ... [Anm. Author: Text gekürzt]
-Unter Berücksichtigung der Passage, diskutieren Sie die primären Beweggründe und Ergebnisse der Föderation von Australien im Jahr 1901, einschließlich der Rollen und Verantwortlichkeiten der Bundesregierung, sowie der andauernden Regierungsstrukturen der individuellen beteiligten Staaten. Betrachten Sie dabei zusätzlich die Fähigkeit der Schülerinnen und Schüler, basierend auf dem gelesenen Text Fragen zu verstehen und zu beantworten. Analysieren Sie, warum die neu formierten Staaten ihre eigenen Regierungssysteme beibehalten haben, als sie sich zum Commonwealth of Australia zusammenschlossen, und reflektieren Sie über die Gründe, warum die föderale Regierung für Angelegenheiten zuständig war, die die gesamte Nation betrafen. ... [Anm. Author: Text gekürzt]	Welche Bedeutung hatte die Gründung der Föderation von Australien im Jahr 1901?
+
+["Unter Berücksichtigung der Passage, diskutieren Sie die primären Beweggründe und Ergebnisse der Föderation von Australien im Jahr 1901, einschließlich der Rollen und Verantwortlichkeiten der Bundesregierung, sowie der andauernden Regierungsstrukturen der individuellen beteiligten Staaten. Betrachten Sie dabei zusätzlich die Fähigkeit der Schülerinnen und Schüler, basierend auf dem gelesenen Text Fragen zu verstehen und zu beantworten. Analysieren Sie, warum die neu formierten Staaten ihre eigenen Regierungssysteme beibehalten haben, als sie sich zum Commonwealth of Australia zusammenschlossen, und reflektieren Sie über die Gründe, warum die föderale Regierung für Angelegenheiten zuständig war, die die gesamte Nation betrafen. ... [Anm. Author: Text gekürzt]"
+
+"Welche Bedeutung hatte die Gründung der Föderation von Australien im Jahr 1901?"]
+
 DPO training
 https://github.com/mayflower/LLaMA-Factory-de_old
+
 Fine-tuned DPO
 DiscoPhoenix-7B, https://huggingface.co/mayflowergmbh/DiscoPhoenix-7B-dpo
+
 Benchmarking
 xxx
 Midigate Risks/Pitfalls
