@@ -56,7 +56,7 @@ Bitte beantworten Sie folgende Frage: Ich möchte die Fähigkeit der Schülerinn
 
 "Welche Bedeutung hatte die Gründung der Föderation von Australien im Jahr 1901?"]
 
-DPO training
+DPO training <next>
 https://github.com/mayflower/LLaMA-Factory-de_old
 
 Fine-tuned DPO
