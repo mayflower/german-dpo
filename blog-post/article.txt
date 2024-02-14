@@ -1,0 +1,69 @@
+Optimizing LLMs with Direct Preference Optimization (DPO): An introduction and application with real-world examples.
+
+1. Introduction and Background
+
+Direct Preference Optimization (DPO) refers to an approach used in artificial intelligence systems to optimize an individual's preferences directly, without relying on explicit models or comparisons. It involves utilizing algorithms to collect and analyze data on an individual's preferences, interests, and feedback to personalize and enhance the user experience. DPO aims to tailor recommendations and suggestions based on a user's unique preferences and needs, thereby increasing satisfaction and engagement with AI systems.
+
+2. Motivation and Benefits
+
+DPO is an approach that aims to directly optimize users' preferences and goals, enabling AI systems to better cater to individual needs. DPO has several benefits:
+
+- Personalization: DPO allows AI systems to adapt to each user's preferences and goals, resulting in personalized experiences. By collecting and analyzing user feedback, DPO can continuously fine-tune and improve AI models to better meet individual needs.
+
+- Improved User Experience: By optimizing for user preferences, DPO ensures that AI systems provide the most relevant and satisfactory outcomes for each user. This leads to better user experiences and increased satisfaction with AI technologies.
+
+- Enhanced Efficiency: DPO enables AI systems to narrow down the options or recommendations they provide to users, leading to more efficient decision-making processes. By considering user preferences directly, unnecessary or irrelevant options can be filtered out, saving users time and effort.
+
+- Adaptive Decision-Making: DPO allows AI systems to adapt and learn from user feedback, making better decisions over time. By constantly optimizing for user preferences, AI models can improve their decision-making capabilities and provide more accurate and context-aware recommendations.
+
+- Ethical Considerations: DPO can contribute to addressing ethical concerns in AI by prioritizing user preferences and goals. By incorporating user-specific values and respecting diverse perspectives, DPO offers a framework for designing AI systems that align with individual needs and avoid biases or unfair outcomes.
+
+In summary, DPO brings the advantages of personalization, improved user experiences, enhanced efficiency, adaptive decision-making, and ethical considerations, making it a valuable approach in the field of AI.
+
+3. Foundations to Direct Preference Optimization (DPO)
+
+The DPO process was initially published in the paper "Direct preference optimization: Your language model is secretly a reward model." [2] in 2023. It introduced the new optimization method for LLMs as an answer of weaknesses regarding the reinforcement learning from human feedback (RLHF) method. They focus on a simple approach for policy optimization using preferences directly.
+
+<Input figure from paper here>
+
+Typically RLHF uses human feedback to first fit a reward model to a dataset of prompts and human preferences over pairs of responses and then use RL to find a policy that maximizes the learned reward. DPO directly optimizes for the policy best satisfying the preferences with a simple classification object, fitting an implicit reward model whose corresponding optimal policy can be extracted in closed form.
+
+DPO can directly finetune the LM without training an explicit reward model upfront. The data itself, which contains the information as pairs of chosen and rejected answers, is used to leverage the model behavior. The training procedure used an implicit model to find the policy that drives the optimization.
+
+4. Showing steps how it works
+
+To make it more transparent, in this section, we show the DPO pipeline that is typically used to run a direct preference optimization. In detail, we cover the
+
+- base model,
+- how to make the DPO training dataset,
+- the DPO training itself,
+- and the benchmarking procedure to test your optimized model.
+
+We explain the steps with the help of real-world examples to make it more transparent what is happening and you can use it directly in optimizing your own LLM's. We also linked the model and code repos that we used in our DPO pipeline, which you can use to dive deeper or directly use in you cases. Let's start now by sketching the process and starting with the base model.
+
+Base model
+
+We started with the Mistral-7B-v0.1 model (link: https://huggingface.co/mistralai/Mistral-7B-v0.1), which is a large language model trained on a diverse range of internet text. It is a powerful base model that we used to optimize with DPO.
+
+DPO training dataset preparation
+https://huggingface.co/datasets/mayflowergmbh/intel_orca_dpo_pairs_de
+
+system	question	chosen	rejected
+Sie sind ein KI-Assistent. Sie erhalten eine Aufgabe. Sie müssen eine detaillierte und lange Antwort generieren.	
+Bitte beantworten Sie folgende Frage: Ich möchte die Fähigkeit der Schülerinnen und Schüler testen, eine Passage zu lesen und Fragen dazu zu beantworten. Könnten Sie sich bitte eine gute Frage für die Passage ausdenken: "Im Jahr 1901 war die Föderation von Australien der Prozess, durch den die sechs separaten britischen selbstverwalteten Kolonien New South Wales, Queensland, South Australia, Tasmanien, Victoria und Western Australia eine Nation bildeten. ... [Anm. Author: Text gekürzt]
+Unter Berücksichtigung der Passage, diskutieren Sie die primären Beweggründe und Ergebnisse der Föderation von Australien im Jahr 1901, einschließlich der Rollen und Verantwortlichkeiten der Bundesregierung, sowie der andauernden Regierungsstrukturen der individuellen beteiligten Staaten. Betrachten Sie dabei zusätzlich die Fähigkeit der Schülerinnen und Schüler, basierend auf dem gelesenen Text Fragen zu verstehen und zu beantworten. Analysieren Sie, warum die neu formierten Staaten ihre eigenen Regierungssysteme beibehalten haben, als sie sich zum Commonwealth of Australia zusammenschlossen, und reflektieren Sie über die Gründe, warum die föderale Regierung für Angelegenheiten zuständig war, die die gesamte Nation betrafen. ... [Anm. Author: Text gekürzt]	Welche Bedeutung hatte die Gründung der Föderation von Australien im Jahr 1901?
+DPO training
+https://github.com/mayflower/LLaMA-Factory-de_old
+Fine-tuned DPO
+DiscoPhoenix-7B, https://huggingface.co/mayflowergmbh/DiscoPhoenix-7B-dpo
+Benchmarking
+xxx
+Midigate Risks/Pitfalls
+xxx
+5. Insights and Best-Practices
+Pro and Cons
+6. Summary and Future Directions
+xxx
+Links & References
+[1] Argilla. (2024). Ultrafeedback-binarized-preferences dataset. https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences. Last accessed: 13. February, 2024.
+[2] Rafailov, R., Sharma, A., Mitchell, E., Ermon, S., Manning, C. D., & Finn, C. (2023). Direct preference optimization: Your language model is secretly a reward model. arXiv preprint arXiv:2305.18290.
